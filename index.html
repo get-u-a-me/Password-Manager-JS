@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Password Manager</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="javascript.js" defer></script>
+</head>
+
+<body>
+    <header>
+        <div class="logo">Password Manager</div>
+        <div class="menu">
+            <button class="add-btn">Add</button>
+        </div>
+
+        <dialog class="add-dialog">
+            <div class="dialog-top">
+                <h2>Password hinzufügen</h2>
+                <button class="add-dialog-close-btn">X</button>
+            </div>
+            <form class="add-dialog-main" action="">
+                <label for="platform">Platform:</label>
+                <input type="text" id="add-platform">
+                <label for="username">username:</label>
+                <input type="text" id="add-username" required>
+                <label for="password">Password:</label>
+                <input type="password" id="add-password" required>
+            </form>
+
+            <button class="dialog-add-btn" type="submit" autofocus>Add</button>
+
+        </dialog>
+    </header>
+
+    <main class="cards-container">
+        <dialog class="edit-dialog">
+            <div class="dialog-top">
+                <h2>Passwort bearbeiten</h2>
+                <button class="edit-dialog-close-btn">X</button>
+            </div>
+            <form class="edit-dialog-main" action="">
+                <label for="platform">Platform:</label>
+                <input type="text" id="edit-platform">
+                <label for="username">username:</label>
+                <input type="text" id="edit-username" >
+                <label for="password">Password:</label>
+                <input type="password" id="edit-password">
+            </form>
+
+            <button class="dialog-edit-btn" type="submit" autofocus>Edit</button>
+
+        </dialog>
+    </main>
+
+</body>
+
+</html>
