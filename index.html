@@ -21,17 +21,16 @@
                 <h2>Password hinzufügen</h2>
                 <button class="add-dialog-close-btn">X</button>
             </div>
-            <form class="add-dialog-main" action="">
+            <form class="add-dialog-main">
                 <label for="platform">Platform:</label>
                 <input type="text" id="add-platform">
                 <label for="username">username:</label>
                 <input type="text" id="add-username" required>
                 <label for="password">Password:</label>
                 <input type="password" id="add-password" required>
+                <button class="dialog-add-btn" type="submit" autofocus>Add</button>
+
             </form>
-
-            <button class="dialog-add-btn" type="submit" autofocus>Add</button>
-
         </dialog>
     </header>
 
@@ -41,18 +40,31 @@
                 <h2>Passwort bearbeiten</h2>
                 <button class="edit-dialog-close-btn">X</button>
             </div>
-            <form class="edit-dialog-main" action="">
+            <form class="edit-form">
                 <label for="platform">Platform:</label>
                 <input type="text" id="edit-platform">
                 <label for="username">username:</label>
-                <input type="text" id="edit-username" >
+                <input type="text" id="edit-username">
                 <label for="password">Password:</label>
                 <input type="password" id="edit-password">
+                <button class="dialog-edit-btn" type="submit" autofocus>Edit</button>
             </form>
 
-            <button class="dialog-edit-btn" type="submit" autofocus>Edit</button>
-
+            <template id="card-template">
+                <div class="card" data-id="">
+                    <div class="edit-card">
+                        <button class="edit-card-btn">✏️</button>
+                        <button class="delete-card-btn">🗑️</button>
+                    </div>
+                    <div class="card-content">
+                        <div class="platform"></div>
+                        <div class="username"></div>
+                        <div class="password"></div>
+                    </div>
+                </div>
+            </template>
         </dialog>
+
     </main>
 
 </body>

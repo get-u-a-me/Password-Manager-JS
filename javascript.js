@@ -3,190 +3,179 @@ const edit_dialog = document.querySelector(".edit-dialog");
 const add_btn = document.querySelector(".add-btn");
 const add_dialog_close_btn = document.querySelector(".add-dialog-close-btn");
 const edit_dialog_close_btn = document.querySelector(".edit-dialog-close-btn");
-const dialog_add_btn = document.querySelector(".dialog-add-btn");
-const dialog_edit_btn = document.querySelector(".dialog-edit-btn");
 const cards_container = document.querySelector(".cards-container");
 
-const savedAccounts = [];
-
-let currentEditAccount = null;
+const savedAccounts = new Map();
 
 window.onload = loadAccounts;
 
+// Datenstruktur für einen Account, erstellt automatisch eine eindeutige ID (UUID)
 class Account {
-    constructor(platform, username, password) {
+    constructor(platform, username, password, id = crypto.randomUUID()) {
         this.platform = platform;
         this.username = username;
         this.password = password;
-        this.id = crypto.randomUUID();
+        this.id = id;
     }
 }
 
+//fügt ein neues Passwort hinzu, updated das UI, speichert die neue Account Liste im LocalStorage
 function addNewPassword(account) {
-    savedAccounts.push(account);
-    renderCard(account);
+    savedAccounts.set(account.id, account);
+    updateOrRenderCard(account);
     saveAccounts();
-
 }
 
+// Lädt gespeicherte Accounts aus dem localStorage, wandelt sie zurück in Account-Objekte und rendert sie.
 function loadAccounts() {
-    let accounts = [];
     try {
-        accounts = JSON.parse(localStorage.getItem("accounts"));
+        const raw = JSON.parse(localStorage.getItem("accounts")) || [];
+        raw.forEach(a => {
+            const acc = new Account(a.platform, a.username, a.password, a.id);
+            savedAccounts.set(acc.id, acc);
+            updateOrRenderCard(acc);
+        });
     } catch (e) {
         console.log(e);
     }
-
-    accounts = accounts.map(a => new Account(a.platform, a.username, a.password));
-
-    accounts.forEach(item => {
-        savedAccounts.push(item)
-        renderCard(item);
-    })
 }
 
+//Speichert die Account Liste im localStorage
 function saveAccounts() {
     try {
-        localStorage.setItem("accounts", JSON.stringify(savedAccounts));
+        const all = Array.from(savedAccounts.values());
+        localStorage.setItem("accounts", JSON.stringify(all));
     } catch (e) {
         console.log(e);
     }
 }
 
-function openEditDialog(accountRef) {
-    currentEditAccount = accountRef;
+// Allgemeine Hilfsfunktion zum Öffnen und Befüllen von Dialogen (Add / Edit)
+function openDialog(dialog, data = {}, mapping = {}) {
+    //stellt die Verbindung der Daten zum richtigen Feld her
+    for (const [key, id] of Object.entries(mapping)) {
+        const el = dialog.querySelector(`#${id}`);
+        if (el) el.value = data[key] || "";
+    }
 
-    document.getElementById("edit-platform").value = accountRef.platform;
-    document.getElementById("edit-username").value = accountRef.username;
-    document.getElementById("edit-password").value = accountRef.password;
+    if (dialog === edit_dialog) {
+        dialog.querySelector("form").dataset.accountId = data.id || "";
+    }
 
-    edit_dialog.showModal();
+    dialog.showModal();
+}
+//öffnet den Dialog und gibt an welche Daten welches Feld nutzen sollen.
+function openEditDialog(account) {
+    openDialog(edit_dialog, account, {
+        platform: "edit-platform",
+        username: "edit-username",
+        password: "edit-password"
+    });
 }
 
-dialog_edit_btn.addEventListener("click", (e) => {
-    const form = document.querySelector(".edit-dialog-main");
+//listener für den submit button des edit dialogs
+document.querySelector(".edit-form").addEventListener("submit", (e) => {
     e.preventDefault();
+    const form = e.target;
 
+    //prüft ob das Feld richtig ausgefüllt ist.
+    //gibt Vlidity fehler falls nicht
     if (!form.checkValidity()) {
         form.reportValidity();
         return;
     }
 
-    const platformInput = document.getElementById("edit-platform").value;
-    const usernameInput = document.getElementById("edit-username").value;
-    const passwordInput = document.getElementById("edit-password").value;
+    //Aktualisiert den Account mit den eingegebenen Daten
+    const accountId = form.dataset.accountId;
+    const account = savedAccounts.get(accountId);
+    if (!account) return;
 
-    if (currentEditAccount) {
-        currentEditAccount.platform = platformInput || "None";
-        currentEditAccount.username = usernameInput;
-        currentEditAccount.password = passwordInput;
+    account.platform = document.getElementById("edit-platform").value || "None";
+    account.username = document.getElementById("edit-username").value;
+    account.password = document.getElementById("edit-password").value;
 
-        saveAccounts();
+    updateOrRenderCard(account);
+    saveAccounts();
 
-        cards_container.innerHTML = "";
-        savedAccounts.forEach(renderCard);
-
-        form.reset();
-        edit_dialog.close();
-        currentEditAccount = null;
-    }
-});
-
-dialog_add_btn.addEventListener("click", (e) => {
-    const form = document.querySelector(".add-dialog-main")
-
-    e.preventDefault();
-
-    if (!form.checkValidity()) {
-        form.reportValidity();
-        return;
-    }
-
-    var platformInput = document.getElementById("add-platform").value;
-    const usernameInput = document.getElementById("add-username").value;
-    const passwordInput = document.getElementById("add-password").value;
-
-    if (platformInput === "") {
-        platformInput = "None";
-    }
-
-    const account = new Account(platformInput, usernameInput, passwordInput);
-    addNewPassword(account);
-    form.reset();
-    add_dialog.close();
-})
-
-function renderCard(account) {
-    //creating DOM 
-    const card = document.createElement("div");
-    card.classList.add("card");
-    card.setAttribute("data-id", account.id);
-
-    const card_content = document.createElement("div")
-    card_content.classList.add("card-content");
-
-    const platform = document.createElement("div");
-    platform.classList.add("platform");
-    platform.textContent = account.platform;
-
-    const username = document.createElement("div");
-    username.classList.add("username");
-    username.textContent = account.username;
-
-    const password = document.createElement("div");
-    password.classList.add("password");
-    password.textContent = account.password;
-
-    card_content.appendChild(platform);
-    card_content.appendChild(username);
-    card_content.appendChild(password);
-
-    const edit_card_wrapper = document.createElement("div");
-    edit_card_wrapper.classList.add("edit-card");
-
-    const edit_card_btn = document.createElement("button");
-    edit_card_btn.classList.add("edit-card-btn");
-    edit_card_btn.textContent = "✏️";
-
-    const delete_card_btn = document.createElement("button");
-    delete_card_btn.classList.add("delete-card-btn");
-    delete_card_btn.textContent = "🗑️";
-
-    edit_card_wrapper.appendChild(edit_card_btn);
-    edit_card_wrapper.appendChild(delete_card_btn);
-
-    card.appendChild(edit_card_wrapper);
-    card.appendChild(card_content);
-    cards_container.appendChild(card);
-
-    //add function to buttons
-    delete_card_btn.addEventListener("click", (e) => {
-        card.remove();
-        const index = savedAccounts.findIndex(b => b.id === account.id);
-        if (index !== -1) {
-            savedAccounts.splice(index, 1);
-            saveAccounts(account);
-        }
-    })
-
-    edit_card_btn.addEventListener("click", (e) => {
-        openEditDialog(account);
-    })
-}
-
-add_btn.addEventListener("click", (e) => {
-    add_dialog.showModal();
-})
-
-edit_dialog_close_btn.addEventListener("click", (e) => {
-    const form = document.querySelector(".edit-dialog-main");
     form.reset();
     edit_dialog.close();
-})
+});
 
-add_dialog_close_btn.addEventListener("click", (e) => {
-    const form = document.querySelector(".add-dialog-main");
+//listener für den add button im hinzufügen Dialog
+document.querySelector(".add-dialog-main").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const form = e.target;
+
+    //prüft ob das Feld richtig ausgefüllt ist.
+    //gibt Vlidity fehler falls nicht
+    if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+    }
+
+    //speichert die Daten als neuen Account
+    const platformInput = document.getElementById("add-platform").value || "None";
+    const usernameInput = document.getElementById("add-username").value;
+    const passwordInput = document.getElementById("add-password").value;
+    //erstellt Acccount
+    const account = new Account(platformInput, usernameInput, passwordInput);
+
+    //fügt Account zur Liste hinzu
+    addNewPassword(account);
+    // Formular leeren, damit beim nächsten Öffnen keine alten Daten angezeigt werden
     form.reset();
     add_dialog.close();
-})
+});
 
+//überprüft ob die Card schon existiert
+//wenn nein Card wirt erstellt,
+//wenn ja nur die Daten aktualisieren
+function updateOrRenderCard(account) {
+    let card = document.querySelector(`.card[data-id="${account.id}"]`);
+
+    if (!card) {
+        renderCard(account);
+        return;
+    }
+
+    card.querySelector(".platform").textContent = account.platform;
+    card.querySelector(".username").textContent = account.username;
+    card.querySelector(".password").textContent = account.password;
+}
+
+//erstellt die Card aus einem Template
+function renderCard(account) {
+    const template = document.getElementById("card-template");
+    const card = template.content.cloneNode(true).querySelector(".card");
+
+    //verknüpft Felder mit Daten
+    card.dataset.id = account.id;
+    card.querySelector(".platform").textContent = account.platform;
+    card.querySelector(".username").textContent = account.username;
+    card.querySelector(".password").textContent = account.password;
+
+    //fügt funktionen zu den buttons hinzu
+    card.querySelector(".edit-card-btn").addEventListener("click", () => openEditDialog(account));
+    card.querySelector(".delete-card-btn").addEventListener("click", () => {
+        savedAccounts.delete(account.id);
+        saveAccounts();
+        card.remove();
+    });
+
+    cards_container.appendChild(card);
+}
+
+// Öffnet den Dialog zum Hinzufügen eines neuen Accounts
+add_btn.addEventListener("click", () => add_dialog.showModal());
+
+//schließt den Dialog zum Hinzufügen ordentlich
+add_dialog_close_btn.addEventListener("click", () => {
+    document.querySelector(".add-dialog-main").reset();
+    add_dialog.close();
+});
+
+//schließt den Dialog zum Bearbeiten ordentlich
+edit_dialog_close_btn.addEventListener("click", () => {
+    document.querySelector(".edit-form").reset();
+    edit_dialog.close();
+});

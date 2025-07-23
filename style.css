@@ -71,18 +71,18 @@ header {
 }
 
 .add-dialog-main,
-.edit-dialog-main {
+.edit-form {
     display: flex;
     flex-direction: column;
 }
 
 .add-dialog-main label,
-.edit-dialog-main label {
+.edit-form label {
     font-size: 1.2rem;
 }
 
 .add-dialog-main input,
-.edit-dialog-main input {
+.edit-form input {
     font-size: 1.3rem;
     color: rgba(0, 0, 0, 0.849);
     margin-bottom: 1rem;
@@ -112,7 +112,7 @@ header {
 main {
     display: grid;
     margin: 2rem;
-    grid-template-columns: repeat(auto-fit, minmax(clamp(200px, 30vw, 400px), 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(clamp(220px, 25vw, 300px), 1fr));
     gap: 1rem;
     gap: 1rem;
 }
