@@ -53,7 +53,7 @@ header {
     font-size: larger;
 }
 
-.add-dialog-close-btn:hover, 
+.add-dialog-close-btn:hover,
 .edit-dialog-close-btn:hover {
     transform: scale(1.2);
 }
@@ -112,7 +112,8 @@ header {
 main {
     display: grid;
     margin: 2rem;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 20%));
+    grid-template-columns: repeat(auto-fit, minmax(clamp(200px, 30vw, 400px), 1fr));
+    gap: 1rem;
     gap: 1rem;
 }
 
@@ -129,7 +130,7 @@ main {
     position: relative;
 }
 
-.card .edit-card{
+.card .edit-card {
     top: 0;
     right: 0;
     position: absolute;
